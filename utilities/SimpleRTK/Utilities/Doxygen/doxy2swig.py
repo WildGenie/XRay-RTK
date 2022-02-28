@@ -38,16 +38,10 @@ import os.path
 
 
 def my_open_read(source):
-    if hasattr(source, "read"):
-        return source
-    else:
-        return open(source)
+    return source if hasattr(source, "read") else open(source)
 
 def my_open_write(dest, mode='w'):
-    if hasattr(dest, "write"):
-        return dest
-    else:
-        return open(dest, mode)
+    return dest if hasattr(dest, "write") else open(dest, mode)
 
 
 class Doxy2SWIG:
@@ -113,9 +107,7 @@ class Doxy2SWIG:
         txt = txt.replace('"', r'\"')
         # ignore pure whitespace
         m = self.space_re.match(txt)
-        if m and len(m.group()) == len(txt):
-            pass
-        else:
+        if not m or len(m.group()) != len(txt):
             self.add_text(textwrap.fill(txt))
 
     def parse_Element(self, node):
@@ -176,9 +168,8 @@ class Doxy2SWIG:
                 self.add_text('\n')
         for n in node.childNodes:
             self.parse(n)
-        if pad:
-            if len(self.pieces) > npiece:
-                self.add_text('\n')
+        if pad and len(self.pieces) > npiece:
+            self.add_text('\n')
 
     def space_parse(self, node):
         self.add_text(' ')
@@ -253,9 +244,9 @@ class Doxy2SWIG:
         kind = node.attributes['kind'].value
         tmp = node.parentNode.parentNode.parentNode
         compdef = tmp.getElementsByTagName('compounddef')[0]
-        cdef_kind = compdef.attributes['kind'].value
-
         if prot == 'public':
+            cdef_kind = compdef.attributes['kind'].value
+
             first = self.get_specific_nodes(node, ('definition', 'name'))
             name = first['name'].firstChild.data
             if name[:8] == 'operator': # Don't handle operators yet.
@@ -279,11 +270,10 @@ class Doxy2SWIG:
                         self.add_text(' %s::%s "/**\n%s'%(ns, name, defn))
                     else:
                         self.add_text(' %s::%s "\n'%(ns, name))
+                elif self.java:
+                    self.add_text(' %s "/**\n%s'%(name, defn))
                 else:
-                    if self.java:
-                        self.add_text(' %s "/**\n%s'%(name, defn))
-                    else:
-                        self.add_text(' %s "\n'%(name))
+                    self.add_text(' %s "\n'%(name))
             elif cdef_kind in ('class', 'struct'):
                 # Get the full function name.
                 anc_node = anc.getElementsByTagName('compoundname')
@@ -339,7 +329,7 @@ class Doxy2SWIG:
         comps = node.getElementsByTagName('compound')
         for c in comps:
             refid = c.attributes['refid'].value
-            fname = refid + '.xml'
+            fname = f'{refid}.xml'
             if not os.path.exists(fname):
                 fname = os.path.join(self.my_dir,  fname)
 #            print "parsing file: %s"%fname
@@ -365,7 +355,7 @@ class Doxy2SWIG:
         count = 0
         for i in pieces:
             if i == '\n':
-                count = count + 1
+                count += 1
             else:
                 if i == '";':
                     if count:

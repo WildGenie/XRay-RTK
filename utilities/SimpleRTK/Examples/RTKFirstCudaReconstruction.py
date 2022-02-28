@@ -20,9 +20,9 @@ sid = 600 # source to isocenter distance in mm
 sdd = 1200 # source to detector distance in mm
 isox = 0 # X coordinate on the projection image of isocenter
 isoy = 0 # Y coordinate on the projection image of isocenter
-for x in range(0,numberOfProjections):
-  angle = firstAngle + x * angularArc / numberOfProjections
-  geometry.AddProjection(sid,sdd,angle,isox,isoy)
+for x in range(numberOfProjections):
+    angle = firstAngle + x * angularArc / numberOfProjections
+    geometry.AddProjection(sid,sdd,angle,isox,isoy)
 
 # Writing the geometry
 geometrywriter = srtk.ThreeDCircularProjectionGeometryXMLFileWriter()

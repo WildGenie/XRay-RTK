@@ -58,7 +58,7 @@ def connect_to_midas(email=None, api_key=None):
     try:
         pydas.login(url=midas_url, email=email, api_key=api_key)
     except:
-        print('Error occurred while logging in to ' + midas_url)
+        print(f'Error occurred while logging in to {midas_url}')
         sys.exit(1)
     session = pydas.session
     communicator = session.communicator
@@ -79,10 +79,14 @@ def upload_to_midas(input_file, output_file, folders, session, communicator):
     def get_child_folder(parent, child_name):
         children = communicator.folder_children(session.token,
                                                 parent['folder_id'])
-        for folder in children['folders']:
-            if folder['name'] == child_name:
-                return folder
-        return None
+        return next(
+            (
+                folder
+                for folder in children['folders']
+                if folder['name'] == child_name
+            ),
+            None,
+        )
     itk_community = communicator.get_community_by_name('RTK')
     itk_public = get_child_folder(itk_community, 'Public')
     simplertk = get_child_folder(itk_public, 'SimpleRTK')
@@ -158,12 +162,8 @@ def run(input_files, output_files,
                                      stdout=subprocess.PIPE)
     if git_email_cmd.wait() is 0:
         git_email = git_email_cmd.stdout.readline().strip()
-        email_input = raw_input('Email [' + git_email + ']: ')
-        if email_input == '':
-            email = git_email
-        else:
-            email = email_input
-
+        email_input = raw_input(f'Email [{git_email}]: ')
+        email = git_email if email_input == '' else email_input
     session, communicator = connect_to_midas(email, api_key)
 
     for ii in range(len(input_files)):
@@ -195,10 +195,7 @@ if __name__ == '__main__':
     else:
         api_key = None
 
-    output_files = []
-    for ii in range(len(input_files)):
-        output_files.append(input_files[ii] + '.md5')
-
+    output_files = [f'{input_files[ii]}.md5' for ii in range(len(input_files))]
     no_delete = options.no_delete
 
     run(input_files, output_files,

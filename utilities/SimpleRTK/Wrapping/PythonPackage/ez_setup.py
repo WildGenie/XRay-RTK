@@ -125,7 +125,7 @@ def use_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
     except ImportError:
         return _do_download(version, download_base, to_dir, download_delay)
     try:
-        pkg_resources.require("setuptools>=" + version)
+        pkg_resources.require(f"setuptools>={version}")
         return
     except pkg_resources.DistributionNotFound:
         return _do_download(version, download_base, to_dir, download_delay)
@@ -177,10 +177,9 @@ def has_powershell():
     cmd = ['powershell', '-Command', 'echo test']
     devnull = open(os.path.devnull, 'wb')
     try:
-        try:
-            subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
-        except:
-            return False
+        subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
+    except:
+        return False
     finally:
         devnull.close()
     return True
@@ -195,10 +194,9 @@ def has_curl():
     cmd = ['curl', '--version']
     devnull = open(os.path.devnull, 'wb')
     try:
-        try:
-            subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
-        except:
-            return False
+        subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
+    except:
+        return False
     finally:
         devnull.close()
     return True
@@ -213,10 +211,9 @@ def has_wget():
     cmd = ['wget', '--version']
     devnull = open(os.path.devnull, 'wb')
     try:
-        try:
-            subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
-        except:
-            return False
+        subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
+    except:
+        return False
     finally:
         devnull.close()
     return True
